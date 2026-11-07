@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type ChangeEvent } from 'react'
 import Fuse from 'fuse.js'
 import reactLogo from './assets/react.svg'
 import viteLogo from './assets/vite.svg'
@@ -6,6 +6,10 @@ import heroImg from './assets/hero.png'
 import './App.css'
 
 import type { Player } from './models/players.ts'
+
+const formatDateForInput = (date: Date) => (
+  Number.isNaN(date.getTime()) ? '' : date.toISOString().split('T')[0]
+);
 
 function App() {
   const [isLoading, setIsLoading] = useState(false);
@@ -57,8 +61,12 @@ function App() {
       return;
     }
 
-    const startDateStr = startDate.toISOString().split('T')[0];
-    const endDateStr = endDate.toISOString().split('T')[0];
+    const startDateStr = formatDateForInput(startDate);
+    const endDateStr = formatDateForInput(endDate);
+    if (!startDateStr || !endDateStr) {
+      return;
+    }
+
     const searchParams = new URLSearchParams({
       isAggregate: 'true',
       isGame: 'true',
@@ -116,6 +124,28 @@ function App() {
     playersLoadPromiseRef.current = loadPromise;
   }, [datesReady, startDate, endDate]);
 
+  const handleStartDateChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const nextDate = new Date(event.target.value);
+    if (Number.isNaN(nextDate.getTime())) {
+      setError('Please enter a valid start date.');
+      return;
+    }
+
+    setError('');
+    setStartDate(nextDate);
+  };
+
+  const handleEndDateChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const nextDate = new Date(event.target.value);
+    if (Number.isNaN(nextDate.getTime())) {
+      setError('Please enter a valid end date.');
+      return;
+    }
+
+    setError('');
+    setEndDate(nextDate);
+  };
+
   const searchPlayers = async (name: string) => {
     setPlayerName(name);
 
@@ -154,11 +184,11 @@ function App() {
         </div>
         <form>
           <label htmlFor="startDate">Start Date: </label>
-          <input type="date" id="startDate" name="startDate" value={startDate.toISOString().split('T')[0]} onChange={(e) => setStartDate(new Date(e.target.value))} />
+          <input type="date" id="startDate" name="startDate" value={formatDateForInput(startDate)} onChange={handleStartDateChange} />
         </form>
         <form>
           <label htmlFor="endDate">End Date: </label>
-          <input type="date" id="endDate" name="endDate" value={endDate.toISOString().split('T')[0]} onChange={(e) => setEndDate(new Date(e.target.value))} />
+          <input type="date" id="endDate" name="endDate" value={formatDateForInput(endDate)} onChange={handleEndDateChange} />
         </form>
         <input
           type="text"
