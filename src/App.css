@@ -56,6 +56,30 @@
   }
 }
 
+.player-table {
+  display: flex;
+  flex-direction: column;
+  width: 80%;
+  margin: auto;
+}
+
+.player-row {
+  width: auto;
+  height: 40px;
+  padding: 5px 10px;
+  margin: 5px;
+  border-color: black;
+  border-style: solid;
+  border-width: 1px;
+  display: flex;
+  place-items: center;
+}
+
+.player-row:hover {
+  background-color: lightgrey;
+  cursor: pointer;
+}
+
 #center {
   display: flex;
   flex-direction: column;

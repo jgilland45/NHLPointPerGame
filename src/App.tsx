@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState, type ChangeEvent } from 'react'
-import Fuse from 'fuse.js'
 import reactLogo from './assets/react.svg'
 import viteLogo from './assets/vite.svg'
 import heroImg from './assets/hero.png'
 import './App.css'
 
 import type { Player } from './models/players.ts'
+import { fuzzySearch } from './utils/fuzzy'
 
 const formatDateForInput = (date: Date) => (
   Number.isNaN(date.getTime()) ? '' : date.toISOString().split('T')[0]
@@ -100,13 +100,7 @@ function App() {
 
         const activeSearch = playerNameRef.current.trim();
         if (activeSearch.length > 0) {
-          const fuse = new Fuse(mappedPlayers, {
-            keys: ['name'],
-            threshold: 0.3,
-            ignoreLocation: true,
-          });
-          const fuzzyMatches = fuse.search(activeSearch).map((result) => result.item);
-          setPlayers(fuzzyMatches);
+          setPlayers(fuzzySearch(mappedPlayers, activeSearch, ['name']));
         } else {
           setPlayers(mappedPlayers);
         }
@@ -155,13 +149,7 @@ function App() {
 
     const sourcePlayers = playersDataRef.current;
     if (name.trim().length > 0) {
-      const fuse = new Fuse(sourcePlayers, {
-        keys: ['name'],
-        threshold: 0.3,
-        ignoreLocation: true,
-      });
-      const fuzzyMatches = fuse.search(name).map((result) => result.item);
-      setPlayers(fuzzyMatches);
+      setPlayers(fuzzySearch(sourcePlayers, name, ['name']));
       return;
     }
 
@@ -199,9 +187,15 @@ function App() {
         />
 
         {isLoading && <p role="status" aria-live="polite">Loading players for selected dates...</p>}
-        <ul>
+        <ul className="player-table">
           {players.map((player) => (
-            <li key={player.playerId}>{player.playerId}: {player.name}</li>
+            <li
+              className="player-row"
+              key={player.playerId}
+              onClick={() => {console.log(player.name)}}
+            >
+              {player.playerId}: {player.name}
+            </li>
           ))}
         </ul>
         {error && <p role="alert">{error}</p>}
